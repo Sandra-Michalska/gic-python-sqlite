@@ -5,37 +5,41 @@ import sqlite3
 app = Flask(__name__) 
 
 
-connect = sqlite3.connect('companyData.db') 
-connect.execute('CREATE TABLE IF NOT EXISTS COMPANY_DATA (logo TEXT, name TEXT, text TEXT)') 
+connect = sqlite3.connect("companyData.db") 
+connect.execute("CREATE TABLE IF NOT EXISTS COMPANY_DATA (id INTEGER PRIMARY KEY, logo_name TEXT NOT NULL, logo_image BLOB NOT NULL, company_name TEXT NOT NULL, description TEXT NOT NULL)") 
 
+def convertToBinaryData(image_name):
+    with open(image_name, "rb") as file:
+        blobData = file.read()
+    return blobData
 
-@app.route('/')
-def index(): 
+@app.route("/")
+def index():
     class CompanyData:
-        def __init__(self, logo, name, text):
-            self.logo = logo
-            self.name = name
-            self.text = text
+        def __init__(self, id, logo_name, logo_image, company_name, description):
+            self.id = id
+            self.logo_name = logo_name
+            self.logo_image = logo_image
+            self.company_name = company_name
+            self.description = description
 
-    companyDataList = []
+    company_data_list = []
 
-    companyDataList.append(CompanyData("LOGO 1", "CD Project", "Szukamy super cool developerów!"))
-    companyDataList.append(CompanyData("LOGO 2", "CD Project 2", "Szukamy cool developerów!"))
-    companyDataList.append(CompanyData("LOGO 3", "CD Project 3", "Szukamy super developerów!"))
+    company_data_list.append(CompanyData(1, "cdproject1", convertToBinaryData("images/cdproject1.png"), "CD Project", "Szukamy super cool developerów!"))
+    company_data_list.append(CompanyData(2, "cdproject2", convertToBinaryData("images/cdproject2.jpeg"), "CD Project 2", "Szukamy cool developerów!"))
+    company_data_list.append(CompanyData(3, "cdproject3", convertToBinaryData("images/cdproject3.jpeg"), "CD Project 3", "Szukamy super developerów!"))
     
-    with sqlite3.connect("companyData.db") as dbData: 
-        cursor = dbData.cursor()
+    with sqlite3.connect("companyData.db") as db_data: 
+        cursor = db_data.cursor()
+        for data in company_data_list:
+            cursor.execute("INSERT INTO COMPANY_DATA (id, logo_name, logo_image, company_name, description) VALUES (?,?,?,?,?)", 
+                                                     (data.id, data.logo_name, data.logo_image, data.company_name, data.description))
+        db_data.commit()
 
-        for data in companyDataList:
-            cursor.execute("INSERT INTO COMPANY_DATA (logo, name, text) VALUES (?,?,?)", 
-                          (data.logo, data.name, data.text)) 
-
-        dbData.commit()
-
-    cursor.execute('SELECT * FROM COMPANY_DATA') 
+    cursor.execute("SELECT * FROM COMPANY_DATA") 
     fetchedCompanyData = cursor.fetchall() 
     return render_template("index.html", companyData=fetchedCompanyData)  
 
 
-if __name__ == '__main__': 
+if __name__ == "__main__": 
     app.run(debug=True) 
