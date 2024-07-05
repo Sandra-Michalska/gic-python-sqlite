@@ -18,8 +18,8 @@
 			{%for item in companyData%} 
 			<tr>
 				<td><img src='{{ url_for("image_from_sqlite", ident = item[0]) }}' /></td>
+				<td>{{item[2]}}</td>
 				<td>{{item[3]}}</td>
-				<td>{{item[4]}}</td>
 			</tr>
 			{%endfor%} 
 		</table>		 

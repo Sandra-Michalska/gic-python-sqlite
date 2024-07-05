@@ -26,27 +26,26 @@ def index():
         return blobData
 
     connect = sqlite3.connect("companyData.db") 
-    connect.execute("CREATE TABLE IF NOT EXISTS COMPANY_DATA (id INTEGER PRIMARY KEY, logo_name TEXT NOT NULL, logo_image BLOB NOT NULL, company_name TEXT NOT NULL, description TEXT NOT NULL)")
+    connect.execute("CREATE TABLE IF NOT EXISTS COMPANY_DATA (id INTEGER PRIMARY KEY, logo_image BLOB NOT NULL, company_name TEXT NOT NULL, description TEXT NOT NULL)")
 
     class CompanyData:
-        def __init__(self, id, logo_name, logo_image, company_name, description):
+        def __init__(self, id, logo_image, company_name, description):
             self.id = id
-            self.logo_name = logo_name
             self.logo_image = logo_image
             self.company_name = company_name
             self.description = description
 
     company_data_list = []
 
-    company_data_list.append(CompanyData(1, "cdproject1", convertToBinaryData("images/cdproject1.png"), "CD Project", "Szukamy super cool developerów!"))
-    company_data_list.append(CompanyData(2, "cdproject2", convertToBinaryData("images/cdproject2.jpeg"), "CD Project 2", "Szukamy cool developerów!"))
-    company_data_list.append(CompanyData(3, "cdproject3", convertToBinaryData("images/cdproject3.jpeg"), "CD Project 3", "Szukamy super developerów!"))
+    company_data_list.append(CompanyData(1, convertToBinaryData("images/exampleLogo1.png"), "Firma numero 1", "Super cool opis firmy 1"))
+    company_data_list.append(CompanyData(2, convertToBinaryData("images/exampleLogo2.png"), "Inna firma 2", "Fajny opisk firmy 2"))
+    company_data_list.append(CompanyData(3, convertToBinaryData("images/exampleLogo3.png"), "Jakaś firma 3", "Jeszcze lepszy opis firmy 3"))
     
     with connect as db_data:
         cursor = db_data.cursor()
         for data in company_data_list:
-            cursor.execute("INSERT OR REPLACE INTO COMPANY_DATA (id, logo_name, logo_image, company_name, description) VALUES (?,?,?,?,?)", 
-                                                     (data.id, data.logo_name, data.logo_image, data.company_name, data.description))
+            cursor.execute("INSERT OR REPLACE INTO COMPANY_DATA (id, logo_image, company_name, description) VALUES (?,?,?,?)", 
+                                                     (data.id, data.logo_image, data.company_name, data.description))
         db_data.commit()
 
     cursor.execute("SELECT * FROM COMPANY_DATA") 
