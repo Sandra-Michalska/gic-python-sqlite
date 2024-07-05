@@ -5,16 +5,16 @@ import sqlite3
 app = Flask(__name__) 
 
 
-connect = sqlite3.connect("companyData.db") 
-connect.execute("CREATE TABLE IF NOT EXISTS COMPANY_DATA (id INTEGER PRIMARY KEY, logo_name TEXT NOT NULL, logo_image BLOB NOT NULL, company_name TEXT NOT NULL, description TEXT NOT NULL)") 
-
-def convertToBinaryData(image_name):
-    with open(image_name, "rb") as file:
-        blobData = file.read()
-    return blobData
-
 @app.route("/")
 def index():
+    def convertToBinaryData(image_name):
+        with open(image_name, "rb") as file:
+            blobData = file.read()
+        return blobData
+
+    connect = sqlite3.connect("companyData.db") 
+    connect.execute("CREATE TABLE IF NOT EXISTS COMPANY_DATA (id INTEGER PRIMARY KEY, logo_name TEXT NOT NULL, logo_image BLOB NOT NULL, company_name TEXT NOT NULL, description TEXT NOT NULL)")
+
     class CompanyData:
         def __init__(self, id, logo_name, logo_image, company_name, description):
             self.id = id
@@ -29,7 +29,7 @@ def index():
     company_data_list.append(CompanyData(2, "cdproject2", convertToBinaryData("images/cdproject2.jpeg"), "CD Project 2", "Szukamy cool developerów!"))
     company_data_list.append(CompanyData(3, "cdproject3", convertToBinaryData("images/cdproject3.jpeg"), "CD Project 3", "Szukamy super developerów!"))
     
-    with sqlite3.connect("companyData.db") as db_data: 
+    with connect as db_data:
         cursor = db_data.cursor()
         for data in company_data_list:
             cursor.execute("INSERT OR REPLACE INTO COMPANY_DATA (id, logo_name, logo_image, company_name, description) VALUES (?,?,?,?,?)", 
