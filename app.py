@@ -1,47 +1,41 @@
-from flask import Flask, render_template, request 
+from flask import Flask, render_template 
 import sqlite3 
+
   
 app = Flask(__name__) 
-  
-  
+
+
+connect = sqlite3.connect('companyData.db') 
+connect.execute('CREATE TABLE IF NOT EXISTS COMPANY_DATA (logo TEXT, name TEXT, text TEXT)') 
+
+
 @app.route('/')
 def index(): 
-    return render_template('index.html') 
-  
-  
-connect = sqlite3.connect('database.db') 
-connect.execute( 
-    'CREATE TABLE IF NOT EXISTS PARTICIPANTS (name TEXT, email TEXT, city TEXT, country TEXT, phone TEXT)') 
-  
-  
-@app.route('/join', methods=['GET', 'POST']) 
-def join(): 
-    if request.method == 'POST': 
-        name = request.form['name'] 
-        email = request.form['email'] 
-        city = request.form['city'] 
-        country = request.form['country'] 
-        phone = request.form['phone'] 
-  
-        with sqlite3.connect("database.db") as users: 
-            cursor = users.cursor() 
-            cursor.execute("INSERT INTO PARTICIPANTS (name,email,city,country,phone) VALUES (?,?,?,?,?)", 
-                           (name, email, city, country, phone)) 
-            users.commit() 
-        return render_template("index.html") 
-    else: 
-        return render_template('join.html') 
-  
-  
-@app.route('/participants') 
-def participants(): 
-    connect = sqlite3.connect('database.db') 
-    cursor = connect.cursor() 
-    cursor.execute('SELECT * FROM PARTICIPANTS') 
-  
-    data = cursor.fetchall() 
-    return render_template("participants.html", data=data) 
-  
-  
+    class CompanyData:
+        def __init__(self, logo, name, text):
+            self.logo = logo
+            self.name = name
+            self.text = text
+
+    companyDataList = []
+
+    companyDataList.append(CompanyData("LOGO 1", "CD Project", "Szukamy super cool developerów!"))
+    companyDataList.append(CompanyData("LOGO 2", "CD Project 2", "Szukamy cool developerów!"))
+    companyDataList.append(CompanyData("LOGO 3", "CD Project 3", "Szukamy super developerów!"))
+    
+    with sqlite3.connect("companyData.db") as dbData: 
+        cursor = dbData.cursor()
+
+        for data in companyDataList:
+            cursor.execute("INSERT INTO COMPANY_DATA (logo, name, text) VALUES (?,?,?)", 
+                          (data.logo, data.name, data.text)) 
+
+        dbData.commit()
+
+    cursor.execute('SELECT * FROM COMPANY_DATA') 
+    fetchedCompanyData = cursor.fetchall() 
+    return render_template("index.html", companyData=fetchedCompanyData)  
+
+
 if __name__ == '__main__': 
-    app.run(debug=False) 
+    app.run(debug=True) 
