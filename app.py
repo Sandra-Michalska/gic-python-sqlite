@@ -1,12 +1,25 @@
-from flask import Flask, render_template 
+from flask import Flask, render_template, send_file
+from io import BytesIO
 import sqlite3 
 
   
 app = Flask(__name__) 
 
 
+@app.route('/i/<int:ident>')
+def image_from_sqlite(ident):
+    connect = sqlite3.connect("companyData.db") 
+    cursor = connect.cursor()
+    cursor.execute("SELECT logo_image FROM COMPANY_DATA WHERE id = ?", (ident,))
+    result = cursor.fetchall()
+    image_bytes = result[0][0] # Get the right column
+    bytes_io = BytesIO(image_bytes)
+    return send_file(bytes_io, mimetype='image/jpeg')
+    
+
 @app.route("/")
 def index():
+    # Convert digital data to binary format
     def convertToBinaryData(image_name):
         with open(image_name, "rb") as file:
             blobData = file.read()
