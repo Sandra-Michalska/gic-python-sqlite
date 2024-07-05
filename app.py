@@ -32,7 +32,7 @@ def index():
     with sqlite3.connect("companyData.db") as db_data: 
         cursor = db_data.cursor()
         for data in company_data_list:
-            cursor.execute("INSERT INTO COMPANY_DATA (id, logo_name, logo_image, company_name, description) VALUES (?,?,?,?,?)", 
+            cursor.execute("INSERT OR REPLACE INTO COMPANY_DATA (id, logo_name, logo_image, company_name, description) VALUES (?,?,?,?,?)", 
                                                      (data.id, data.logo_name, data.logo_image, data.company_name, data.description))
         db_data.commit()
 
